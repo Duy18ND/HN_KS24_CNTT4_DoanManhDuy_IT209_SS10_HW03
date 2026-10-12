@@ -1,0 +1,24 @@
+# ============================================================
+# Dockerfile.single - Single-stage Build (KHÔNG tối ưu)
+# Sử dụng một image duy nhất chứa cả JDK + Gradle + Source
+# Kết quả: Image lớn, chứa nhiều file không cần thiết
+# ============================================================
+
+FROM gradle:9.4.1-jdk17-alpine
+
+WORKDIR /app
+
+# Copy toàn bộ source code vào image
+COPY . .
+
+# Cấp quyền thực thi cho gradlew
+RUN chmod +x gradlew
+
+# Cài đặt dependencies và build project
+RUN ./gradlew clean bootJar --no-daemon
+
+# Expose port 8080
+EXPOSE 8080
+
+# Chạy ứng dụng bằng JDK (không phải JRE tối ưu)
+ENTRYPOINT ["java", "-jar", "build/libs/RestApi_Category_Product-0.0.1-SNAPSHOT.jar"]
